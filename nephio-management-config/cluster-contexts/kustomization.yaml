@@ -1,0 +1,24 @@
+#==============================================================================
+# FILE 2: Cluster Contexts Kustomization
+# Location: nephio-management-config/cluster-contexts/kustomization.yaml
+# Purpose: Lists all ClusterContext YAML files
+#==============================================================================
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+metadata:
+  name: cluster-contexts
+
+# List all ClusterContext files
+resources:
+  - clustercontext-my-ran.yaml
+  - clustercontext-my-core.yaml
+
+# Optional: Add common labels to all ClusterContexts
+commonLabels:
+  nephio.org/config-type: cluster-context
+
+# Optional: Add common annotations
+# commonAnnotations:
+#   description: "Workload cluster registrations"

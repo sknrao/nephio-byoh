@@ -1,0 +1,41 @@
+# PackageVariant for my-ran cluster
+apiVersion: config.porch.kpt.dev/v1alpha2
+kind: PackageVariant
+metadata:
+  name: baseline-my-ran
+  namespace: default
+  annotations:
+    nephio.org/description: "Baseline for RAN workload cluster"
+spec:
+  upstream:
+    repo: nephio-blueprints
+    package: cluster-baseline
+    revision: main
+  downstream:
+    repo: nephio-my-ran
+    package: cluster-baseline
+  adoption: adoptExisting
+  packageContext:
+    data:
+      cluster-name: my-ran
+      cluster-type: workload
+      workload-type: ran
+    repositoryRef:
+      name: nephio-my-ran
+    removeLocalConfigResources: true
+  pipeline:
+    mutators:
+      - image: gcr.io/kpt-fn/apply-setters:v0.2
+        configMap:
+          # Cluster-specific values for my-ran
+          cluster-name: my-ran
+          cluster-type: workload
+          workload-type: ran
+          site-id: site-ran-01
+          cluster-repo-url: https://github.com/YOUR-ORG/nephio-my-ran.git
+          cluster-repo-branch: main
+          namespace-prefix: ""
+          storage-class-name: local-path
+          enable-node-labeling-job: "true"
+          enable-pod-security: "true"
+

@@ -1,0 +1,26 @@
+#==============================================================================
+# FILE 3: Repositories Kustomization
+# Location: nephio-management-config/repositories/kustomization.yaml
+# Purpose: Lists all Repository CR YAML files
+#==============================================================================
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+metadata:
+  name: repositories
+
+# List all Repository CR files
+resources:
+  - repository-blueprints.yaml
+  - repository-my-ran.yaml
+  - repository-my-core.yaml
+  # If using private repos, uncomment:
+  # - git-credentials-secret.yaml
+
+# Optional: Common labels
+commonLabels:
+  nephio.org/config-type: repository
+
+# Optional: Ensure repositories are applied in order
+# (though kubectl handles dependencies automatically)

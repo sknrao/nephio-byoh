@@ -1,0 +1,40 @@
+# PackageVariant for my-core cluster
+apiVersion: config.porch.kpt.dev/v1alpha2
+kind: PackageVariant
+metadata:
+  name: baseline-my-core
+  namespace: default
+  annotations:
+    nephio.org/description: "Baseline for Core workload cluster"
+spec:
+  upstream:
+    repo: nephio-blueprints
+    package: cluster-baseline  # SAME package as my-ran
+    revision: main
+  downstream:
+    repo: nephio-my-core
+    package: cluster-baseline
+  adoption: adoptExisting
+  packageContext:
+    data:
+      cluster-name: my-core
+      cluster-type: workload
+      workload-type: core
+    repositoryRef:
+      name: nephio-my-core
+    removeLocalConfigResources: true
+  pipeline:
+    mutators:
+      - image: gcr.io/kpt-fn/apply-setters:v0.2
+        configMap:
+          # Cluster-specific values for my-core (DIFFERENT from my-ran)
+          cluster-name: my-core
+          cluster-type: workload
+          workload-type: core
+          site-id: site-core-01
+          cluster-repo-url: https://github.com/YOUR-ORG/nephio-my-core.git
+          cluster-repo-branch: main
+          namespace-prefix: ""
+          storage-class-name: local-path
+          enable-node-labeling-job: "true"
+          enable-pod-security: "true"

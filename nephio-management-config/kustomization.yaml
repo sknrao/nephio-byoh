@@ -1,0 +1,26 @@
+#==============================================================================
+# FILE 1: Root Kustomization
+# Location: nephio-management-config/kustomization.yaml
+# Purpose: Main entry point - references all subdirectories
+#==============================================================================
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Metadata (optional but useful)
+metadata:
+  name: nephio-management-config
+
+# Resources to include (subdirectories)
+resources:
+  - cluster-contexts/
+  - repositories/
+  - packagevariants/
+
+# Optional: Namespace to apply all resources to (if needed)
+# namespace: default
+
+# Optional: Common labels to add to all resources
+# commonLabels:
+#   app.kubernetes.io/managed-by: kustomize
+#   nephio.org/management-config: "true"

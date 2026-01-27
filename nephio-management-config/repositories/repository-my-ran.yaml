@@ -1,0 +1,28 @@
+#==============================================================================
+# Repository CR for nephio-my-ran (DOWNSTREAM)
+# Purpose: Rendered packages for RAN cluster
+# Deployment: true (Porch writes here, ConfigSync reads from here)
+#==============================================================================
+
+apiVersion: config.porch.kpt.dev/v1alpha1
+kind: Repository
+metadata:
+  name: nephio-my-ran
+  namespace: default
+  labels:
+    nephio.org/repository-type: downstream
+    nephio.org/cluster: my-ran
+    nephio.org/workload-type: ran
+spec:
+  description: Deployment packages for my-ran workload cluster
+  type: git
+  content: Package
+  deployment: true  # This is a deployment/downstream repo
+  git:
+    repo: https://github.com/YOUR-ORG/nephio-my-ran.git  # CHANGE THIS
+    branch: main
+    directory: /
+    # auth: none  # Use this for public repos
+    # For private repos, uncomment below:
+    # secretRef:
+    #   name: git-credentials

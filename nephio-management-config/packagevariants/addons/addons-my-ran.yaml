@@ -1,0 +1,27 @@
+apiVersion: config.porch.kpt.dev/v1alpha2
+kind: PackageVariant
+metadata:
+  name: addons-my-ran
+  namespace: default
+spec:
+  upstream:
+    repo: nephio-blueprints
+    package: platform-addons
+    revision: main
+  downstream:
+    repo: nephio-my-ran
+    package: platform-addons
+  adoption: adoptExisting
+  packageContext:
+    repositoryRef:
+      name: nephio-my-ran
+  pipeline:
+    mutators:
+      - image: gcr.io/kpt-fn/apply-setters:v0.2
+        configMap:
+          cluster-name: my-ran
+          local-path-provisioner: "true"
+          storage-class-name: local-path
+          enable-prometheus: "false"
+          enable-metrics-server: "true"
+          enable-nginx-ingress: "false"

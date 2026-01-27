@@ -1,0 +1,47 @@
+#==============================================================================
+# Repository CR for nephio-my-core (DOWNSTREAM)
+# Purpose: Rendered packages for CORE cluster
+# Deployment: true (Porch writes here, ConfigSync reads from here)
+#==============================================================================
+
+apiVersion: config.porch.kpt.dev/v1alpha1
+kind: Repository
+metadata:
+  name: nephio-my-core
+  namespace: default
+  labels:
+    nephio.org/repository-type: downstream
+    nephio.org/cluster: my-core
+    nephio.org/workload-type: core
+spec:
+  description: Deployment packages for my-core workload cluster
+  type: git
+  content: Package
+  deployment: true  # This is a deployment/downstream repo
+  git:
+    repo: https://github.com/YOUR-ORG/nephio-my-core.git  # CHANGE THIS
+    branch: main
+    directory: /
+    # auth: none  # Use this for public repos
+    # For private repos, uncomment below:
+    # secretRef:
+    #   name: git-credentials
+
+---
+
+#==============================================================================
+# OPTIONAL: Git Credentials Secret (for private repositories)
+# Only needed if your repos are private
+#==============================================================================
+
+# apiVersion: v1
+# kind: Secret
+# metadata:
+#   name: git-credentials
+#   namespace: default
+# type: kubernetes.io/basic-auth
+# stringData:
+#   username: YOUR_GITHUB_USERNAME
+#   password: YOUR_GITHUB_TOKEN  # Use Personal Access Token, not password
+#   # For GitHub: Token needs 'repo' scope
+#   # For GitLab: Token needs 'read_repository' and 'write_repository' scopes

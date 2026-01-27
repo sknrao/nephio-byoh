@@ -1,0 +1,26 @@
+apiVersion: config.porch.kpt.dev/v1alpha2
+kind: PackageVariant
+metadata:
+  name: multus-my-ran
+  namespace: default
+spec:
+  upstream:
+    repo: networking-blueprints  # Your networking catalog repo
+    package: multus-cni
+    revision: main
+  downstream:
+    repo: nephio-my-ran  # Target cluster repo
+    package: multus-cni
+  adoption: adoptExisting
+  packageContext:
+    data:
+      cluster-name: my-ran
+    repositoryRef:
+      name: nephio-my-ran
+    removeLocalConfigResources: true
+  pipeline:
+    mutators:
+      - image: gcr.io/kpt-fn/apply-setters:v0.2
+        configMap:
+          multus-image: ghcr.io/k8snetworkplumbingwg/multus-cni:v4.0.2
+          cni-plugins-image: ghcr.io/k8snetworkplumbingwg/cni-plugins:v1.2.0

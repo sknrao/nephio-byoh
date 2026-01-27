@@ -1,0 +1,256 @@
+#==============================================================================
+# FILE 2: rootsync.yaml
+# Location: nephio-blueprints/cluster-baseline/rootsync.yaml
+# Purpose: Configure ConfigSync to watch a specific git repository
+#==============================================================================
+
+# RootSync tells ConfigSync which git repository to watch and sync from.
+# This file will be rendered by Porch with cluster-specific values.
+
+apiVersion: configsync.gke.io/v1beta1
+kind: RootSync
+metadata:
+  name: root-sync
+  namespace: config-management-system
+  annotations:
+    # Ensure ConfigSync CRD exists before this is applied
+    config.kubernetes.io/depends-on: apiextensions.k8s.io/namespaces/CustomResourceDefinition/rootsyncs.configsync.gke.io
+spec:
+  # Source format - "unstructured" means any valid Kubernetes YAML
+  sourceFormat: unstructured
+  
+  # Git repository configuration
+  git:
+    # Repository URL - will be set by Porch using kpt-set
+    repo: https://github.com/YOUR-ORG/nephio-my-ran.git # kpt-set: ${cluster-repo-url}
+    
+    # Branch to sync from
+    branch: main # kpt-set: ${cluster-repo-branch}
+    
+    # Directory within the repository to sync
+    # "/" means sync the entire repository
+    dir: /
+    
+    # Authentication method
+    # Options: none, ssh, token, gcenode, gcpserviceaccount
+    auth: none
+    
+    # How often to check for changes (default: 15s)
+    period: 15s
+    
+    # Optional: Specific revision (commit SHA, tag)
+    # If not specified, uses latest commit on branch
+    # revision: abc123def456
+    
+    # Optional: For private repositories, reference a secret
+    # Uncomment and create secret if needed
+    # secretRef:
+    #   name: git-creds # kpt-set: ${cluster-name}-git-creds
+    
+    # Optional: Skip SSL verification (not recommended for production)
+    # noSSLVerify: false
+
+  # Optional: Override settings (advanced)
+  # override:
+  #   resources:
+  #     - group: apps
+  #       kind: Deployment
+  #       name: my-app
+  #       namespace: default
+  #   statusMode: enabled
+  #   logLevels:
+  #     - debug
+
+---
+# OPTIONAL: Git credentials secret (only if using private repos)
+# This secret should be created if git.auth is set to "token" or "ssh"
+
+# For token authentication (HTTPS with Personal Access Token):
+# apiVersion: v1
+# kind: Secret
+# metadata:
+#   name: git-creds # kpt-set: ${cluster-name}-git-creds
+#   namespace: config-management-system
+# type: kubernetes.io/basic-auth
+# stringData:
+#   username: YOUR_GITHUB_USERNAME
+#   password: YOUR_GITHUB_TOKEN  # Personal Access Token with 'repo' scope
+
+# For SSH authentication:
+# apiVersion: v1
+# kind: Secret
+# metadata:
+#   name: git-creds # kpt-set: ${cluster-name}-git-creds
+#   namespace: config-management-system
+# type: kubernetes.io/ssh-auth
+# data:
+#   ssh: <base64-encoded-ssh-private-key>
+
+
+#==============================================================================
+# USAGE INSTRUCTIONS
+#==============================================================================
+
+# These files work together:
+# 1. configsync.yaml installs ConfigSync on the cluster
+# 2. rootsync.yaml tells ConfigSync which repo to watch
+
+# IMPORTANT: These must be applied MANUALLY to bootstrap the cluster
+# (This is the one-time manual step per cluster)
+
+# On my-ran cluster:
+#   kubectl config use-context my-ran
+#   kubectl apply -f configsync.yaml
+#   # Wait for ConfigSync pods to be ready
+#   kubectl wait --for=condition=Ready pod -l app=reconciler-manager \
+#     -n config-management-system --timeout=300s
+#   kubectl apply -f rootsync.yaml
+
+# On my-core cluster:
+#   kubectl config use-context my-core
+#   kubectl apply -f configsync.yaml
+#   kubectl wait --for=condition=Ready pod -l app=reconciler-manager \
+#     -n config-management-system --timeout=300s
+#   kubectl apply -f rootsync.yaml
+
+# After this, ConfigSync will automatically:
+# 1. Clone the git repository
+# 2. Watch for changes every 15 seconds
+# 3. Apply any YAML files it finds
+# 4. Reconcile drift (if someone manually changes something)
+
+# Verify ConfigSync is working:
+#   kubectl get rootsync -n config-management-system
+#   kubectl describe rootsync root-sync -n config-management-system
+#   kubectl get pods -n config-management-system
+
+# Check sync status:
+#   kubectl get rootsync root-sync -n config-management-system -o yaml
+
+# Expected status when synced:
+#   status:
+#     sync:
+#       commit: abc123...
+#       lastUpdate: "2024-01-27T10:30:00Z"
+#       status: "SYNCED"
+
+
+#==============================================================================
+# KPT SETTERS
+#==============================================================================
+
+# When Porch renders this package, it will replace these values:
+# - ${cluster-repo-url} → https://github.com/YOUR-ORG/nephio-my-ran.git
+# - ${cluster-repo-branch} → main
+# - ${cluster-name} → my-ran or my-core
+
+# This is configured in the PackageVariant:
+#   pipeline:
+#     mutators:
+#       - image: gcr.io/kpt-fn/apply-setters:v0.2
+#         configMap:
+#           cluster-repo-url: https://github.com/YOUR-ORG/nephio-my-ran.git
+#           cluster-repo-branch: main
+#           cluster-name: my-ran
+
+
+#==============================================================================
+# TROUBLESHOOTING
+#==============================================================================
+
+# Issue: ConfigSync pods not starting
+# Check:
+#   kubectl get pods -n config-management-system
+#   kubectl logs -n config-management-system deployment/reconciler-manager
+# Solution: Ensure images are accessible, check RBAC
+
+# Issue: RootSync shows "ERROR" status
+# Check:
+#   kubectl describe rootsync root-sync -n config-management-system
+# Common causes:
+#   - Git repo doesn't exist or URL is wrong
+#   - Branch doesn't exist
+#   - Authentication failed (for private repos)
+#   - Network connectivity issues
+# Solution: Fix the repo URL or add authentication
+
+# Issue: RootSync not syncing
+# Check:
+#   kubectl get rootsync root-sync -n config-management-system -o yaml
+#   kubectl logs -n config-management-system -l app=root-reconciler
+# Solution: Check git repo accessibility, verify branch exists
+
+# Issue: Changes in git not appearing in cluster
+# Check:
+#   kubectl get rootsync root-sync -n config-management-system
+#   # Look at sync.commit and compare with git repo
+# Solution: 
+#   - Wait up to 15 seconds (period setting)
+#   - Check reconciler logs for errors
+#   - Verify YAML syntax in git repo
+
+# Issue: "authentication required" error
+# Solution: Create git-creds secret and reference in rootsync.yaml:
+#   secretRef:
+#     name: git-creds
+
+
+#==============================================================================
+# ALTERNATIVE: Using OCI Images (Advanced)
+#==============================================================================
+
+# ConfigSync can also sync from OCI registries instead of git:
+# apiVersion: configsync.gke.io/v1beta1
+# kind: RootSync
+# metadata:
+#   name: root-sync
+#   namespace: config-management-system
+# spec:
+#   sourceFormat: unstructured
+#   oci:
+#     image: us-docker.pkg.dev/YOUR-PROJECT/YOUR-REPO/config:latest
+#     auth: gcpserviceaccount
+#     gcpServiceAccountEmail: config-sync@PROJECT.iam.gserviceaccount.com
+
+
+#==============================================================================
+# PRODUCTION CONSIDERATIONS
+#==============================================================================
+
+# 1. Resource Limits
+# Adjust based on cluster size and number of resources:
+#   resources:
+#     requests:
+#       cpu: 200m    # Increase for large clusters
+#       memory: 500Mi
+#     limits:
+#       cpu: 2000m
+#       memory: 2Gi
+
+# 2. High Availability
+# For production, consider multiple replicas:
+#   replicas: 2  # In reconciler-manager deployment
+
+# 3. Monitoring
+# ConfigSync exposes metrics on port 8080:
+#   kubectl port-forward -n config-management-system deployment/reconciler-manager 8080:8080
+#   curl localhost:8080/metrics
+
+# 4. Git Repository Best Practices
+# - Use a dedicated branch for each cluster
+# - Enable branch protection
+# - Require PR reviews for changes
+# - Use signed commits
+# - Set up CI/CD to validate YAML before merge
+
+# 5. Security
+# - Use private repositories for sensitive configurations
+# - Rotate git credentials regularly
+# - Use SSH keys instead of tokens where possible
+# - Enable audit logging on git repository
+
+# 6. Backup and Disaster Recovery
+# - Git repository IS your backup (declarative config)
+# - To restore a cluster: redeploy ConfigSync + RootSync
+# - ConfigSync will sync all resources from git
+# - No need for etcd backups if using GitOps properly

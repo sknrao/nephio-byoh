@@ -1,0 +1,26 @@
+apiVersion: config.porch.kpt.dev/v1alpha2
+kind: PackageVariant
+metadata:
+  name: multus-my-core
+  namespace: default
+spec:
+  upstream:
+    repo: networking-blueprints
+    package: multus-cni
+    revision: main
+  downstream:
+    repo: nephio-my-core
+    package: multus-cni
+  adoption: adoptExisting
+  packageContext:
+    data:
+      cluster-name: my-core
+    repositoryRef:
+      name: nephio-my-core
+    removeLocalConfigResources: true
+  pipeline:
+    mutators:
+      - image: gcr.io/kpt-fn/apply-setters:v0.2
+        configMap:
+          multus-image: ghcr.io/k8snetworkplumbingwg/multus-cni:v4.0.2
+          cni-plugins-image: ghcr.io/k8snetworkplumbingwg/cni-plugins:v1.2.0

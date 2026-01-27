@@ -1,0 +1,27 @@
+#==============================================================================
+# Repository CR for nephio-blueprints (UPSTREAM)
+# Purpose: Blueprint packages (cluster-baseline, platform-addons, networking)
+# Deployment: false (this is a source/template repository)
+#==============================================================================
+
+apiVersion: config.porch.kpt.dev/v1alpha1
+kind: Repository
+metadata:
+  name: nephio-blueprints
+  namespace: default
+  labels:
+    nephio.org/repository-type: upstream
+    nephio.org/content-type: blueprints
+spec:
+  description: Nephio blueprint packages for infrastructure and networking
+  type: git
+  content: Package
+  deployment: false  # This is an upstream/blueprint repo
+  git:
+    repo: https://github.com/YOUR-ORG/nephio-blueprints.git  # CHANGE THIS
+    branch: main
+    directory: /
+    # auth: none  # Use this for public repos
+    # For private repos, uncomment below:
+    # secretRef:
+    #   name: git-credentials

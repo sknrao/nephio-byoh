@@ -1,0 +1,25 @@
+apiVersion: config.porch.kpt.dev/v1alpha2
+kind: PackageVariant
+metadata:
+  name: whereabouts-my-ran
+  namespace: default
+spec:
+  upstream:
+    repo: networking-blueprints
+    package: whereabouts-ipam
+    revision: main
+  downstream:
+    repo: nephio-my-ran
+    package: whereabouts-ipam
+  adoption: adoptExisting
+  packageContext:
+    data:
+      cluster-name: my-ran
+    repositoryRef:
+      name: nephio-my-ran
+    removeLocalConfigResources: true
+  pipeline:
+    mutators:
+      - image: gcr.io/kpt-fn/apply-setters:v0.2
+        configMap:
+          whereabouts-image: ghcr.io/k8snetworkplumbingwg/whereabouts:v0.6.3

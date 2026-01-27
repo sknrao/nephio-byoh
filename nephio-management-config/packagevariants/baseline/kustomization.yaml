@@ -1,0 +1,26 @@
+#==============================================================================
+# FILE 5: Baseline PackageVariants Kustomization
+# Location: nephio-management-config/packagevariants/baseline/kustomization.yaml
+# Purpose: Lists baseline PackageVariant files (cluster-baseline packages)
+#==============================================================================
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+metadata:
+  name: baseline-packagevariants
+
+# List all baseline PackageVariant files
+resources:
+  - baseline-my-ran.yaml
+  - baseline-my-core.yaml
+
+# Optional: Common labels
+commonLabels:
+  nephio.org/packagevariant-type: baseline
+
+# Optional: Add annotations
+commonAnnotations:
+  nephio.org/description: "Baseline infrastructure PackageVariants"
+
+# Note: Baseline includes ConfigSync, namespaces, security policies

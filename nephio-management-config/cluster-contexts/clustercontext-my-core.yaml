@@ -1,0 +1,39 @@
+#==============================================================================
+# ClusterContext for my-core (CORE Workload Cluster)
+#==============================================================================
+
+apiVersion: infra.nephio.org/v1alpha1
+kind: ClusterContext
+metadata:
+  name: my-core
+  namespace: default
+  labels:
+    nephio.org/cluster-type: workload
+    nephio.org/workload-type: core
+    nephio.org/site-code: site-core-01
+spec:
+  # Cluster identification
+  clusterName: my-core
+  siteCode: site-core-01
+  
+  # CNI configuration
+  cnis:
+    - calico      # Primary CNI (already installed)
+    - macvlan     # Secondary CNI (will be added via Multus)
+  
+  # Optional: Cluster-specific annotations
+  annotations:
+    nephio.org/description: "Core workload cluster for Free5GC deployment"
+    nephio.org/location: "Bengaluru, Karnataka, IN"
+    nephio.org/environment: "development"
+  
+  # Optional: Provider information
+  provider: baremetal
+  
+  # Optional: Network context
+  # Uncomment and adjust if needed
+  # networkContexts:
+  #   - name: control-plane
+  #     ipRange: 192.168.10.0/24
+  #   - name: user-plane
+  #     ipRange: 192.168.20.0/24
