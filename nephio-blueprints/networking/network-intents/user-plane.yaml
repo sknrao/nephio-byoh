@@ -1,19 +1,23 @@
-apiVersion: v1
-kind: ConfigMap
+apiVersion: nephio.org/v1alpha1
+kind: NetworkIntent
 metadata:
-  name: user-plane-network-intent
-  namespace: default
+  name: user-plane-intent
   annotations:
     config.kubernetes.io/local-config: "true"
-    nephio.org/network-type: "user-plane"
-    nephio.org/applies-to: "ran,core"
-data:
-  networkName: "user-plane"
-  ipRange: "192.168.20.0/24" # kpt-set: ${user-plane-range}
-  gateway: "192.168.20.1" # kpt-set: ${user-plane-gateway}
-  vlan: "200" # kpt-set: ${user-plane-vlan}
-  interface: "eth0" # kpt-set: ${interface-name}
-  mtu: "1500" # kpt-set: ${mtu}
-  description: "5G User Plane Network - N3/N4/N6/N9 interfaces"
-  excludeRanges: |
-    - 192.168.20.1-192.168.20.10
+spec:
+  networkName: user-plane
+  interfaceType: macvlan # kpt-set: ${cni-type}
+  macvlanConfig:
+    mode: bridge # kpt-set: ${macvlan-mode}
+    master: eth0 # kpt-set: ${interface-name}
+  ipAllocation:
+    type: whereabouts
+    ranges:
+      - subnet: 192.168.20.0/24 # kpt-set: ${user-plane-range}
+        gateway: 192.168.20.1 # kpt-set: ${user-plane-gateway}
+        rangeStart: 192.168.20.10
+        rangeEnd: 192.168.20.250
+  vlanConfig:
+    vlanId: 0 # kpt-set: ${user-plane-vlan}
+  mtu: 1500 # kpt-set: ${mtu}
+  targetNamespace: openairinterface # kpt-set: ${target-namespace}

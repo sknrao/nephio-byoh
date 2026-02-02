@@ -5,11 +5,12 @@ metadata:
   annotations:
     config.kubernetes.io/local-config: "true"
 info:
-  description: Multus CNI DaemonSet for multi-interface support
+  description: Multus CNI DaemonSet for multi-interface support with macvlan
   keywords:
     - multus
     - cni
     - networking
+    - macvlan
   site: https://github.com/k8snetworkplumbingwg/multus-cni
 
 pipeline:

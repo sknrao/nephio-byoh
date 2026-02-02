@@ -5,26 +5,23 @@ metadata:
   annotations:
     config.kubernetes.io/local-config: "true"
 info:
-  description: High-level network intent definitions for control and user planes
+  description: Network intents for 5G workloads with macvlan support
   keywords:
-    - network
-    - intent
+    - network-intents
+    - macvlan
     - 5g
-
 pipeline:
   mutators:
     - image: gcr.io/kpt-fn/apply-setters:v0.2
       configMap:
-        # Control Plane Network
         control-plane-range: "192.168.10.0/24"
         control-plane-gateway: "192.168.10.1"
-        control-plane-vlan: "100"
-        
-        # User Plane Network
+        control-plane-vlan: "0"
         user-plane-range: "192.168.20.0/24"
         user-plane-gateway: "192.168.20.1"
-        user-plane-vlan: "200"
-        
-        # Common settings
+        user-plane-vlan: "0"
         interface-name: "eth0"
         mtu: "1500"
+        cni-type: "macvlan"
+        macvlan-mode: "bridge"
+        target-namespace: "default"

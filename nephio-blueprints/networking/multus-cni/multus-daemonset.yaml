@@ -146,7 +146,7 @@ spec:
         securityContext:
           privileged: true
           capabilities:
-            add: ["SYS_ADMIN"]
+            add: ["SYS_ADMIN", "NET_ADMIN"]
         volumeMounts:
         - name: cni
           mountPath: /host/etc/cni/net.d
@@ -161,6 +161,32 @@ spec:
           - "cp"
           - "/usr/src/multus-cni/bin/multus"
           - "/host/opt/cni/bin/multus"
+        resources:
+          requests:
+            cpu: "10m"
+            memory: "15Mi"
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - name: cnibin
+          mountPath: /host/opt/cni/bin
+          mountPropagation: Bidirectional
+      - name: install-cni-plugins
+        image: ghcr.io/k8snetworkplumbingwg/cni-plugins:v1.2.0 # kpt-set: ${cni-plugins-image}
+        command:
+          - "sh"
+          - "-c"
+          - |
+            cp /opt/cni/bin/macvlan /host/opt/cni/bin/macvlan
+            cp /opt/cni/bin/ipvlan /host/opt/cni/bin/ipvlan
+            cp /opt/cni/bin/vlan /host/opt/cni/bin/vlan
+            cp /opt/cni/bin/bridge /host/opt/cni/bin/bridge
+            cp /opt/cni/bin/host-device /host/opt/cni/bin/host-device
+            chmod +x /host/opt/cni/bin/macvlan
+            chmod +x /host/opt/cni/bin/ipvlan
+            chmod +x /host/opt/cni/bin/vlan
+            chmod +x /host/opt/cni/bin/bridge
+            chmod +x /host/opt/cni/bin/host-device
         resources:
           requests:
             cpu: "10m"

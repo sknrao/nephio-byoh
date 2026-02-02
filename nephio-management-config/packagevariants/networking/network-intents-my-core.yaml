@@ -1,0 +1,38 @@
+apiVersion: config.porch.kpt.dev/v1alpha2
+kind: PackageVariant
+metadata:
+  name: network-intents-my-core
+  namespace: default
+spec:
+  upstream:
+    repo: networking-blueprints
+    package: network-intents
+    revision: main
+  downstream:
+    repo: nephio-my-core
+    package: network-intents-macvlan
+  adoption: adoptExisting
+  pipeline:
+    mutators:
+      - image: gcr.io/kpt-fn/apply-setters:v0.2
+        configMap:
+          # Network configuration
+          control-plane-range: "192.168.10.0/24"
+          control-plane-gateway: "192.168.10.1"
+          control-plane-vlan: "0"
+          user-plane-range: "192.168.20.0/24"
+          user-plane-gateway: "192.168.20.1"
+          user-plane-vlan: "0"
+          interface-name: "eth0"
+          mtu: "1500"
+          
+          # CNI type configuration
+          cni-type: "macvlan"
+          macvlan-mode: "bridge"
+          
+          # Target configuration
+          target-namespace: "free5gc"
+          target-cluster: "my-core"
+
+    - image: docker.io/nephio/nad-fn:v3.0.0
+      configPath: nad-renderer-config.yaml

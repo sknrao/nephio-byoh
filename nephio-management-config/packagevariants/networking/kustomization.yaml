@@ -16,6 +16,8 @@ resources:
   - multus-my-core.yaml
   - whereabouts-my-ran.yaml
   - whereabouts-my-core.yaml
+  - network-intents-my-ran.yaml
+  - network-intents-my-core.yaml
   # If you have NAD renderer PackageVariants:
   # - nads-my-ran.yaml
   # - nads-my-core.yaml
@@ -26,6 +28,6 @@ commonLabels:
 
 # Optional: Add annotations
 commonAnnotations:
-  nephio.org/description: "Networking PackageVariants (Multus, Whereabouts, NADs)"
+  nephio.org/description: "Networking PackageVariants (Multus, Whereabouts, NetworkIntents)"
 
 # Note: Networking includes Multus CNI, Whereabouts IPAM, NetworkAttachmentDefinitions
