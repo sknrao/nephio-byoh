@@ -10,7 +10,7 @@ spec:
     revision: main
   downstream:
     repo: nephio-my-core
-    package: network-intents-macvlan
+    package: network-intents
   adoption: adoptExisting
   pipeline:
     mutators:
