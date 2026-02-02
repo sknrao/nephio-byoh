@@ -34,5 +34,5 @@ spec:
           target-namespace: "free5gc"
           target-cluster: "my-core"
 
-    - image: docker.io/nephio/nad-fn:v3.0.0
-      configPath: nad-renderer-config.yaml
+     - image: docker.io/nephio/nad-fn:v3.0.0
+       configPath: nad-renderer-config.yaml

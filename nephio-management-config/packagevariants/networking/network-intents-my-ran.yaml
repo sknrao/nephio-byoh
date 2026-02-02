@@ -34,5 +34,5 @@ spec:
           target-namespace: "openairinterface"
           target-cluster: "my-ran"
 
-     - image: docker.io/nephio/nad-fn:v3.0.0
-       configPath: nad-renderer-config.yaml
+      - image: docker.io/nephio/nad-fn:v3.0.0
+        configPath: nad-renderer-config.yaml
